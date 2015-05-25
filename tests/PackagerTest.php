@@ -41,6 +41,14 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
         $phar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/test.tar');
         $this->assertTrue(isset($phar['test/binary']));
         $this->assertTrue(isset($phar['test2/abc']));
+
+        $command = $packager->build();
+        $this->assertEquals('rpmbuild -bb '.$_SERVER['HOME'].'/rpmbuild/SPECS/test.spec', $command);
+        exec($command, $_, $result);
+        $this->assertEquals(0, $result);
+        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-0.1-1.noarch.rpm'));
+
+        unlink($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-0.1-1.noarch.rpm');
         unlink($_SERVER['HOME'].'/rpmbuild/SPECS/test.spec');
         unlink($_SERVER['HOME'].'/rpmbuild/SOURCES/test.tar');
 
