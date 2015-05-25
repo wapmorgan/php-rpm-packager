@@ -8,7 +8,6 @@ class Packager {
     private $_spec;
     private $mountPoints = array();
     private $outputPath;
-    private $resultFile;
 
     /**
      * Set the control file
@@ -48,8 +47,8 @@ class Packager {
         return $this;
     }
 
-    public function getResultFile() {
-        return $this->resultFile;
+    public function movePackage($dest) {
+        return rename($_SERVER['HOME'].'/rpmbuild/RPMS/'.$this->_spec->BuildArch.'/'.$this->_spec->Name.'-'.$this->_spec->Version.'-'.$this->_spec->Release.'.'.$this->_spec->BuildArch.'.rpm', $dest);
     }
 
     public function run() {
@@ -122,7 +121,6 @@ class Packager {
 
     public function build() {
         $command = 'rpmbuild -bb '.$_SERVER['HOME'].'/rpmbuild/SPECS/'.$this->_spec->Name.'.spec';
-        $this->resultFile = $_SERVER['HOME'].'/rpmbuild/RPMS/'.$this->_spec->BuildArch.'/'.$this->_spec->Name.'-'.$this->_spec->Version.'-'.$this->_spec->Release.'.'.$this->_spec->BuildArch.'.rpm';
         return $command;
     }
 
