@@ -1,6 +1,6 @@
 {
     "name": "wapmorgan/php-rpm-packager",
-    "description": "RPM packager for php",
+    "description": "RPM packager for PHP applications.",
     "keywords": ["rpm", "packager", "package building"],
     "autoload": {
         "psr-4": {
