@@ -6,9 +6,9 @@ use wapmorgan\rpm\Spec;
 
 class PackagerTest extends PHPUnit_Framework_TestCase {
     public function testSimple() {
-        exec('rpm --version', $_, $result);
-        if ($result != 0) {
-            $this->markSkipped('This test can not be performed on a system without rpm');
+        exec('command -v rpm', $output, $result);
+        if (empty($output)) {
+            $this->markTestSkipped('This test can not be performed on a system without rpm');
         }
 
         $dir = __DIR__.'/package/';
