@@ -5,12 +5,13 @@ class Spec {
     private $_keys = array(
         'Name' => '',
         'Version' => '0.1',
-        'Release' => '',
+        'Release' => '1',
         'Summary' => '',
         'Group' => '',
-        'License' => '',
+        'License' => 'free',
         'URL' => '',
         'BuildRequires' => '',
+        'BuildArch' => 'noarch',
         'Requires' => '',
     );
 
@@ -18,20 +19,89 @@ class Spec {
         'description' => '',
         'prep' => '%autosetup',
         'build' => '',
-        'install' => 'rm -rf %{buildroot}
-mkdir -p %{buildroot}%{_bindir}/
-mkdir -p %{buildroot}%{_libdir}/'."\n",
+        'install' => '',
         'files' => '',
         'changelog' => '',
     );
 
-    public function __set($prop, $value) {
-        if (isset($this->_keys[$prop]))
-            $this->_keys[$prop] = $value;
-        else if (isset($this->_blocks[$prop]))
-            $this->_blocks[$prop] = $value;
-        else
-            $this->_keys[$prop] = $value;
+    public function setPackageName($name) {
+        $this->_keys['Name'] = $name;
+        return $this;
+    }
+
+    public function setVersion($version) {
+        $this->_keys['Version'] = $version;
+        return $this;
+    }
+
+    public function setRelease($release) {
+        $this->_keys['Release'] = $release;
+        return $this;
+    }
+
+    public function setSummary($summary) {
+        $this->_keys['Summary'] = $summary;
+        return $this;
+    }
+
+    public function setGroup($group) {
+        $this->_keys['Group'] = $group;
+        return $this;
+    }
+
+    public function setLicense($license) {
+        $this->_keys['License'] = $license;
+        return $this;
+    }
+
+    public function setUrl($url) {
+        $this->_keys['URL'] = $url;
+        return $this;
+    }
+
+    public function setBuildRequires($buildRequires) {
+        $this->_keys['BuildRequires'] = $buildRequires;
+        return $this;
+    }
+
+    public function setBuildArch($buildArch) {
+        $this->_keys['BuildArch'] = $buildArch;
+        return $this;
+    }
+
+    public function setRequires($requires) {
+        $this->_keys['Requires'] = $requires;
+        return $this;
+    }
+
+    public function setDescription($description) {
+        $this->_blocks['description'] = $description;
+        return $this;
+    }
+
+    public function setPrep($prep) {
+        $this->_blocks['prep'] = $prep;
+        return $this;
+    }
+
+    public function setBuild($build) {
+        $this->_blocks['build'] = $build;
+        return $this;
+    }
+
+    public function setInstall($install) {
+        $this->_blocks['install'] = $install;
+        return $this;
+    }
+
+    public function setFiles($files) {
+        $this->_blocks['files'] = $files;
+        return $this;
+    }
+
+    public function setChangelog($changelog) {
+        $this->_blocks['changelog'] = $changelog;
+        return $this;
     }
 
     public function __get($prop) {
@@ -41,10 +111,17 @@ mkdir -p %{buildroot}%{_libdir}/'."\n",
             return $this->_blocks[$prop];
     }
 
+    public function setKey($prop, $value) {
+        $this->_keys[$prop] = $value;
+        return $this;
+    }
+
     public function __toString() {
         $spec = '';
         foreach ($this->_keys as $key => $value) {
-            $spec .= sprintf('%12s %s'."\n", $key.':', $value);
+            if ($value === '')
+                continue;
+            $spec .= sprintf('%s: %s'."\n", $key, $value);
         }
 
         foreach ($this->_blocks as $block => $value) {

@@ -1,10 +1,13 @@
 <?php
 namespace wapmorgan\rpm;
 
+use PharData;
+use DirectoryIterator;
+
 class Packager {
     private $_spec;
-    private $_mountPoints = array();
-    private $_outputPath;
+    private $mountPoints = array();
+    private $outputPath;
 
     /**
      * Set the control file
@@ -30,31 +33,28 @@ class Packager {
         return $this->_spec;
     }
 
-    /**
-     * @deprecated See addMount instead
-     */
-    public function mount($sourcePath, $destinationPath) {
-        return $this->addMount($sourcePath, $destinationPath);
-    }
-
-    public function addMount($sourcePath, $destinationPath) {
-        $this->_mountPoints[$sourcePath] = $destinationPath;
-        return $this;
-    }
-
     public function setOutputPath($path) {
-        $this->_outputPath = $path;
+        $this->outputPath = $path;
         return $this;
     }
 
     public function getOutputPath() {
-        return $this->_outputPath;
+        return $this->outputPath;
     }
 
-    public function run()
-    {
-        if (file_exists($spec)) {
-            $iterator = new \DirectoryIterator($this->getOutputPath());
+    public function addMount($sourcePath, $destinationPath) {
+        $this->mountPoints[$sourcePath] = $destinationPath;
+        return $this;
+    }
+
+    public function run($sourceDirectory) {
+        if (!is_dir($_SERVER['HOME'].'/rpmbuild/SOURCES'))
+            mkdir($_SERVER['HOME'].'/rpmbuild/SOURCES', 0777);
+        if (!is_dir($_SERVER['HOME'].'/rpmbuild/SPECS'))
+            mkdir($_SERVER['HOME'].'/rpmbuild/SPECS', 0777);
+
+        if (file_exists($this->getOutputPath())) {
+            $iterator = new DirectoryIterator($this->getOutputPath());
             foreach ($iterator as $path) {
                 if ($path != '.' || $path != '..') {
                     echo "OUTPUT DIRECTORY MUST BE EMPTY! Something exists, exit immediately!" . PHP_EOL;
@@ -62,47 +62,81 @@ class Packager {
                 }
             }
         }
-        if (!is_dir("~/rpmbuild/SOURCES"))
-            mkdir("~/rpmbuild/SOURCES", 0777);
-        if (!is_dir("~/rpmbuild/SPECS"))
-            mkdir("~/rpmbuild/SPECS", 0777);
 
         mkdir($this->getOutputPath(), 0777);
 
-        foreach ($this->_mountPoints as $path => $dest) {
-            $this->_pathToPath($path, $this->getOutputPath() . DIRECTORY_SEPARATOR . $dest);
+        foreach ($this->mountPoints as $path => $dest) {
+            $this->pathToPath($path, $this->getOutputPath().DIRECTORY_SEPARATOR.$dest);
         }
 
-        $zip = new \ZipArchive();
-        $zip->open("~/rpmbuild/SOURCES/".$this->_spec->Name.'-'.$this->_spec->Version.'.zip');
-        $zip->addGlob($this->getOutputPath().'/*');
-        $zip->close();
+        $spec = $this->_spec;
+        $spec->setPrep('%autosetup -c package');
+        $install_section = 'rm -rf %{buildroot}'."\n".'cp -rp * %{buildroot}';
 
-        file_put_contents("~/rpmbuild/SPECS/".$this->_spec->Name.'.spec', (string)$this->_spec);
+        // $created_dirs = array();
+        // foreach ($this->mountPoints as $sourcePath => $destinationPath) {
+        //     if (is_dir($sourcePath)) {
+        //         $dir = dirname($sourcePath);
+        //         if (!isset($created_dirs[$dir]))
+        //             $install_section .= 'mkdir -p %{buildroot}'.$dir."\n";
+        //         $install_section .= 'cp -pr '.$sourcePath.' %{buildroot}'.$destinationPath;
+        //         $created_dirs[$dir] = true;
+        //     } else {
+        //         $dir = dirname($sourcePath);
+        //         if (!isset($created_dirs[$dir]))
+        //             $install_section .= 'mkdir -p %{buildroot}'.$dir."\n";
+        //         $install_section .= 'cp -p '.$sourcePath.' %{buildroot}'.$destinationPath;
+        //         $created_dirs[$dir] = true;
+        //     }
+        // }
+
+        $spec->setInstall($install_section);
+
+        // $files_section = null;
+        // foreach ($this->mountPoints as $sourcePath => $destinationPath) {
+        //     if (is_dir($sourcePath)) {
+        //         $files_section .= '%{buildroot}'.$destinationPath.'/*';
+        //     } else {
+        //         $files_section .= '%{buildroot}'.$destinationPath;
+        //     }
+        // }
+
+        // $spec->setFiles($files_section);
+        $spec->setFiles('%{buildroot}*');
+
+        $tar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->getName().'.tar');
+        $tar->buildFromDirectory($this->outputPath);
+
+        file_put_contents($_SERVER['HOME'].'/rpmbuild/SPECS/'.$this->_spec->getName().'.spec', (string)$this->_spec);
 
         return $this;
     }
 
-    private function _pathToPath($path, $dest)
+    public function build() {
+        $command = 'rpmbuild -ba '.$_SERVER['HOME'].'/rpmbuild/SPECS/'.$this->_spec->getName().'.spec';
+        return $command;
+    }
+
+    private function pathToPath($path, $dest)
     {
         if (is_dir($path)) {
-            $iterator = new \DirectoryIterator($path);
+            $iterator = new DirectoryIterator($path);
             foreach ($iterator as $element) {
                 if ($element != '.' && $element != '..') {
                     $fullPath = $path . DIRECTORY_SEPARATOR . $element;
                     if (is_dir($fullPath)) {
-                        $this->_pathToPath($fullPath, $dest . DIRECTORY_SEPARATOR . $element);
+                        $this->pathToPath($fullPath, $dest . DIRECTORY_SEPARATOR . $element);
                     } else {
-                        $this->_copy($fullPath, $dest . DIRECTORY_SEPARATOR . $element);
+                        $this->copy($fullPath, $dest . DIRECTORY_SEPARATOR . $element);
                     }
                 }
             }
         } else if (is_file($path)) {
-            $this->_copy($path, $dest);
+            $this->copy($path, $dest);
         }
     }
 
-    private function _copy($source, $dest)
+    private function copy($source, $dest)
     {
         $destFolder = dirname($dest);
         if (!file_exists($destFolder)) {
@@ -111,13 +145,5 @@ class Packager {
         copy($source, $dest);
         if (fileperms($source) != fileperms($dest))
             chmod($dest, fileperms($source));
-    }
-
-    public function build()
-    {
-
-        $command = "cd ~/rpmbuild/SPECS; rpmbuild -ba {$this->_spec->Name}; cd -";
-
-        return $command;
     }
 }
