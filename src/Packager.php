@@ -47,7 +47,7 @@ class Packager {
         return $this;
     }
 
-    public function run($sourceDirectory) {
+    public function run() {
         if (!is_dir($_SERVER['HOME'].'/rpmbuild/SOURCES'))
             mkdir($_SERVER['HOME'].'/rpmbuild/SOURCES', 0777);
         if (!is_dir($_SERVER['HOME'].'/rpmbuild/SPECS'))
@@ -102,18 +102,19 @@ class Packager {
         // }
 
         // $spec->setFiles($files_section);
-        $spec->setFiles('%{buildroot}*');
+        $spec->setFiles('%{buildroot}/*');
 
-        $tar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->getName().'.tar');
+        $tar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->Name.'.tar');
         $tar->buildFromDirectory($this->outputPath);
+        $spec->setKey('Source0', $this->_spec->Name.'.tar');
 
-        file_put_contents($_SERVER['HOME'].'/rpmbuild/SPECS/'.$this->_spec->getName().'.spec', (string)$this->_spec);
+        file_put_contents($_SERVER['HOME'].'/rpmbuild/SPECS/'.$this->_spec->Name.'.spec', (string)$this->_spec);
 
         return $this;
     }
 
     public function build() {
-        $command = 'rpmbuild -ba '.$_SERVER['HOME'].'/rpmbuild/SPECS/'.$this->_spec->getName().'.spec';
+        $command = 'rpmbuild -ba '.$_SERVER['HOME'].'/rpmbuild/SPECS/'.$this->_spec->Name.'.spec';
         return $command;
     }
 
