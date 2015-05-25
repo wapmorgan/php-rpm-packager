@@ -114,7 +114,7 @@ class Packager {
     }
 
     public function build() {
-        $command = 'rpmbuild -ba '.$_SERVER['HOME'].'/rpmbuild/SPECS/'.$this->_spec->Name.'.spec';
+        $command = 'rpmbuild -bb '.$_SERVER['HOME'].'/rpmbuild/SPECS/'.$this->_spec->Name.'.spec';
         return $command;
     }
 
