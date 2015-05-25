@@ -3,6 +3,8 @@ RPM packager (PHP)
 
 A simple rpm packager for PHP applications.
 
+* [![Build Status](https://travis-ci.org/wapmorgan/php-rpm-packager.svg)](https://travis-ci.org/wapmorgan/php-rpm-packager)
+
 Get composer:
 
 ```
