@@ -44,10 +44,12 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(isset($phar['test2/abc']));
 
         $command = $packager->build();
+        $result_file = $packager->getResultFile();
         $this->assertEquals('rpmbuild -bb '.$_SERVER['HOME'].'/rpmbuild/SPECS/test.spec', $command);
+        $this->assertEquals($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-0.1-1.noarch.rpm', $result_file);
         exec($command, $_, $result);
         $this->assertEquals(0, $result);
-        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-0.1-1.noarch.rpm'));
+        $this->assertTrue(file_exists($result_file));
 
         unlink($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-0.1-1.noarch.rpm');
         unlink($_SERVER['HOME'].'/rpmbuild/SPECS/test.spec');
@@ -97,10 +99,12 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(isset($phar['usr/lib/test/abc']));
 
         $command = $packager->build();
+        $result_file = $packager->getResultFile();
         $this->assertEquals('rpmbuild -bb '.$_SERVER['HOME'].'/rpmbuild/SPECS/test.spec', $command);
+        $this->assertEquals($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-0.1-1.noarch.rpm', $result_file);
         exec($command, $_, $result);
         $this->assertEquals(0, $result);
-        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-0.1-1.noarch.rpm'));
+        $this->assertTrue(file_exists($result_file));
 
         unlink($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-0.1-1.noarch.rpm');
         unlink($_SERVER['HOME'].'/rpmbuild/SPECS/test.spec');

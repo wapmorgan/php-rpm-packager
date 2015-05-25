@@ -8,6 +8,7 @@ class Packager {
     private $_spec;
     private $mountPoints = array();
     private $outputPath;
+    private $resultFile;
 
     /**
      * Set the control file
@@ -45,6 +46,10 @@ class Packager {
     public function addMount($sourcePath, $destinationPath) {
         $this->mountPoints[$sourcePath] = $destinationPath;
         return $this;
+    }
+
+    public function getResultFile() {
+        return $this->resultFile;
     }
 
     public function run() {
@@ -115,11 +120,11 @@ class Packager {
 
     public function build() {
         $command = 'rpmbuild -bb '.$_SERVER['HOME'].'/rpmbuild/SPECS/'.$this->_spec->Name.'.spec';
+        $this->resultFile = $_SERVER['HOME'].'/rpmbuild/RPMS/'.$this->_spec->BuildArch.'/'.$this->_spec->Name.'-'.$this->_spec->Version.'-'.$this->_spec->Release.'.'.$this->_spec->BuildArch.'.rpm';
         return $command;
     }
 
-    private function pathToPath($path, $dest)
-    {
+    private function pathToPath($path, $dest) {
         if (is_dir($path)) {
             $iterator = new DirectoryIterator($path);
             foreach ($iterator as $element) {
@@ -137,8 +142,7 @@ class Packager {
         }
     }
 
-    private function copy($source, $dest)
-    {
+    private function copy($source, $dest) {
         $destFolder = dirname($dest);
         if (!file_exists($destFolder)) {
             mkdir($destFolder, 0777, true);
