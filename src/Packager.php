@@ -71,7 +71,7 @@ class Packager {
 
         $spec = $this->_spec;
         $spec->setPrep('%autosetup -c package');
-        $install_section = 'rm -rf %{buildroot}'."\n".'cp -rp * %{buildroot}';
+        $install_section = 'rm -rf %{buildroot}'."\n".'mkdir -p %{buildroot}'."\n".'cp -rp * %{buildroot}';
 
         // $created_dirs = array();
         // foreach ($this->mountPoints as $sourcePath => $destinationPath) {
@@ -102,7 +102,7 @@ class Packager {
         // }
 
         // $spec->setFiles($files_section);
-        $spec->setFiles('%{buildroot}/*');
+        $spec->setFiles('/*');
 
         $tar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->Name.'.tar');
         $tar->buildFromDirectory($this->outputPath);

@@ -33,8 +33,8 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
         $packager->addMount($dir, '/');
         $packager->run();
         $this->assertEquals('%autosetup -c package', $spec->prep);
-        $this->assertEquals('rm -rf %{buildroot}'."\n".'cp -rp * %{buildroot}', $spec->install);
-        $this->assertEquals('%{buildroot}/*', $spec->files);
+        $this->assertEquals('rm -rf %{buildroot}'."\n".'mkdir -p %{buildroot}'."\n".'cp -rp * %{buildroot}', $spec->install);
+        $this->assertEquals('/*', $spec->files);
         $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SPECS/test.spec'));
         $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SOURCES/test.tar'));
 
