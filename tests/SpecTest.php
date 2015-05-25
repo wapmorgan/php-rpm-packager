@@ -13,6 +13,7 @@ class SpecTest extends PHPUnit_Framework_TestCase {
 Name: simplepackage
 Version: 1.0.0
 Release: 1
+Summary: ...
 License: free
 BuildArch: noarch
 

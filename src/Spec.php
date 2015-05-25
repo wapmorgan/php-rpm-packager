@@ -6,7 +6,7 @@ class Spec {
         'Name' => '',
         'Version' => '0.1',
         'Release' => '1',
-        'Summary' => '',
+        'Summary' => '...',
         'Group' => '',
         'License' => 'free',
         'URL' => '',
