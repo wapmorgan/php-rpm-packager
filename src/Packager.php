@@ -109,6 +109,8 @@ class Packager {
         // $spec->setFiles($files_section);
         $spec->setFiles('/*');
 
+        if (file_exists($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->Name.'.tar'))
+            unlink($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->Name.'.tar');
         $tar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->Name.'.tar');
         $tar->buildFromDirectory($this->outputPath);
         $spec->setKey('Source0', $this->_spec->Name.'.tar');
