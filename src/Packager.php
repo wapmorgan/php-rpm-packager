@@ -60,14 +60,15 @@ class Packager {
         if (file_exists($this->getOutputPath())) {
             $iterator = new DirectoryIterator($this->getOutputPath());
             foreach ($iterator as $path) {
-                if ($path != '.' || $path != '..') {
+                if ($path != '.' && $path != '..') {
                     echo "OUTPUT DIRECTORY MUST BE EMPTY! Something exists, exit immediately!" . PHP_EOL;
                     exit();
                 }
             }
         }
 
-        mkdir($this->getOutputPath(), 0777);
+        if (!is_dir($this->getOutputPath()))
+            mkdir($this->getOutputPath(), 0777);
 
         foreach ($this->mountPoints as $path => $dest) {
             $this->pathToPath($path, $this->getOutputPath().DIRECTORY_SEPARATOR.$dest);
@@ -75,7 +76,28 @@ class Packager {
 
         $spec = $this->_spec;
         $spec->setPrep('%autosetup -c package');
-        $install_section = 'rm -rf %{buildroot}'."\n".'mkdir -p %{buildroot}'."\n".'cp -rp * %{buildroot}';
+        $install_section = 'rm -rf %{buildroot}'."\n".'mkdir -p %{buildroot}';//."\n".'cp -rp * %{buildroot}';
+
+        $created_dirs = array();
+        foreach ($this->mountPoints as $source => $dest) {
+            if (is_dir($source)) {
+                $install_section .= "\n".'mkdir -p %{buildroot}'.$dest."\n".'cp -rp '.trim($dest, '/').'/* %{buildroot}'.$dest;
+            } else {
+                $dir = dirname($dest);
+                if (!in_array($dir, $created_dirs)) {
+                    $install_section .= "\n".'mkdir -p %{buildroot}'.$dir;
+                    $created_dirs[] = $dir;
+                }
+                // directory exists on a real machine - add files one by one
+                if (is_dir($dir)) {
+                    $install_section .= "\n".'cp -p '.ltrim($dest, '/').' %{buildroot}'.$dest;
+                } else { // add all files within directory
+                    if (!in_array($dir, $files)) {
+                        $install_section .= "\n".'cp -rp '.ltrim($dest, '/').' %{buildroot}'.$dest;
+                    }
+                }
+            }
+        }
 
         // $created_dirs = array();
         // foreach ($this->mountPoints as $sourcePath => $destinationPath) {
@@ -96,7 +118,7 @@ class Packager {
 
         $spec->setInstall($install_section);
 
-        // $files_section = null;
+        $files = array();
         // foreach ($this->mountPoints as $sourcePath => $destinationPath) {
         //     if (is_dir($sourcePath)) {
         //         $files_section .= '%{buildroot}'.$destinationPath.'/*';
@@ -106,10 +128,27 @@ class Packager {
         // }
 
         // $spec->setFiles($files_section);
-        $spec->setFiles('/*');
+        $used_dirs = array();
+        foreach ($this->mountPoints as $source => $dest) {
+            if (is_dir($source)) {
+                $files[] = $dest;
+            } else {
+                $dir = dirname($dest);
+                // directory exists on a real machine - add files one by one
+                if (is_dir($dir)) {
+                    $files[] = $dest;
+                } else { // add all files within directory
+                    if (!in_array($dir, $files)) {
+                        $files[] = $dir;
+                    }
+                }
+            }
+        }
+        $spec->setFiles(implode("\n", $files));
 
-        if (file_exists($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->Name.'.tar'))
+        if (file_exists($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->Name.'.tar')) {
             unlink($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->Name.'.tar');
+        }
         $tar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/'.$this->_spec->Name.'.tar');
         $tar->buildFromDirectory($this->outputPath);
         $spec->setKey('Source0', $this->_spec->Name.'.tar');
