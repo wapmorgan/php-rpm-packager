@@ -84,7 +84,7 @@ class Packager {
             if (is_dir($sourcePath)) {
                 $files_section .= (strlen($files_section) > 0 ? "\n" : null).rtrim($destinationPath, '/').'/';
             } else {
-                $files_section .= (strlen($files_section) > 0 ? "\n" : null).$destinationPath;
+                $files_section .= (strlen($files_section) > 0 ? "\n" : null).'%attr('.substr(sprintf('%o', fileperms($sourcePath)), -4).',root,root) '.$destinationPath;
             }
         }
 

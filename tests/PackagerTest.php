@@ -27,6 +27,7 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
 
         mkdir(__DIR__.'/package/test', 0755, true);
         touch(__DIR__.'/package/test/binary');
+        chmod(__DIR__.'/package/test/binary', 0755);
         mkdir(__DIR__.'/package/test2');
         touch(__DIR__.'/package/test2/abc');
 
@@ -42,7 +43,7 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals('%autosetup -c package', $spec->prep);
         $this->assertEquals('rm -rf %{buildroot}'."\n".'mkdir -p %{buildroot}'."\n".'cp -rp * %{buildroot}', $spec->install);
-        $this->assertEquals('/usr/bin/binary'."\n".'/usr/lib/test/', $spec->files);
+        $this->assertEquals('%attr(0755,root,root) /usr/bin/binary'."\n".'/usr/lib/test/', $spec->files);
         $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SPECS/test-c.spec'));
         $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SOURCES/test-c.tar'));
 
@@ -74,6 +75,7 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
 
         mkdir(__DIR__.'/package/test', 0755, true);
         touch(__DIR__.'/package/test/binary');
+        chmod(__DIR__.'/package/test/binary', 0755);
         mkdir(__DIR__.'/package/test2');
         touch(__DIR__.'/package/test2/abc');
 
