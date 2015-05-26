@@ -57,6 +57,9 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-c-0.1-2.noarch.rpm'));
         $this->assertTrue($packager->movePackage(__DIR__.'/test-c-0.1.rpm'));
         $this->assertTrue(file_exists(__DIR__.'/test-c-0.1.rpm'));
+        $expected_files = array('/usr/bin/binary', '/usr/lib/test', '/usr/lib/test/abc');
+        exec('rpm -qlp '.__DIR__.'/test-c-0.1.rpm', $actual_files, $_);
+        $this->assertEquals($expected_files, $actual_files);
 
         unlink(__DIR__.'/test-c-0.1.rpm');
         unlink($_SERVER['HOME'].'/rpmbuild/SPECS/test-c.spec');
@@ -100,6 +103,9 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
         $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-s-0.1-1.noarch.rpm'));
         $this->assertTrue($packager->movePackage(__DIR__.'/test-s-0.1.rpm'));
         $this->assertTrue(file_exists(__DIR__.'/test-s-0.1.rpm'));
+        $expected_files = array('/usr/share/test', '/usr/share/test/test', '/usr/share/test/test/binary', '/usr/share/test/test2', '/usr/share/test/test2/abc');
+        exec('rpm -qlp '.__DIR__.'/test-s-0.1.rpm', $actual_files, $_);
+        $this->assertEquals($expected_files, $actual_files);
 
         unlink(__DIR__.'/test-s-0.1.rpm');
         unlink($_SERVER['HOME'].'/rpmbuild/SPECS/test-s.spec');
