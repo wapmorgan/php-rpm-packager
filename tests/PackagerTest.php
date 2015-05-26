@@ -31,7 +31,7 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
         touch(__DIR__.'/package/test2/abc');
 
         $spec = new Spec();
-        $spec->setPackageName('test')->setRelease(2);
+        $spec->setPackageName('test-c')->setRelease(2);
         $packager = new Packager();
         $packager->setSpec($spec);
 
@@ -41,26 +41,26 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
         $packager->run();
 
         $this->assertEquals('%autosetup -c package', $spec->prep);
-        $this->assertEquals('rm -rf %{buildroot}'."\n".'mkdir -p %{buildroot}'."\n".'mkdir -p %{buildroot}/usr/bin'."\n".'cp -p usr/bin/binary %{buildroot}/usr/bin/binary'."\n".'mkdir -p %{buildroot}/usr/lib/test/'."\n".'cp -rp usr/lib/test/* %{buildroot}/usr/lib/test/', $spec->install);
+        $this->assertEquals('rm -rf %{buildroot}'."\n".'mkdir -p %{buildroot}'."\n".'cp -rp * %{buildroot}', $spec->install);
         $this->assertEquals('/usr/bin/binary'."\n".'/usr/lib/test/', $spec->files);
-        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SPECS/test.spec'));
-        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SOURCES/test.tar'));
+        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SPECS/test-c.spec'));
+        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SOURCES/test-c.tar'));
 
-        $phar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/test.tar');
+        $phar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/test-c.tar');
         $this->assertTrue(isset($phar['usr/bin/binary']));
         $this->assertTrue(isset($phar['usr/lib/test/abc']));
 
         $command = $packager->build();
-        $this->assertEquals('rpmbuild -bb '.$_SERVER['HOME'].'/rpmbuild/SPECS/test.spec', $command);
+        $this->assertEquals('rpmbuild -bb '.$_SERVER['HOME'].'/rpmbuild/SPECS/test-c.spec', $command);
         exec($command, $_, $result);
         $this->assertEquals(0, $result);
-        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-0.1-2.noarch.rpm'));
-        $this->assertTrue($packager->movePackage(__DIR__.'/test-0.1.rpm'));
-        $this->assertTrue(file_exists(__DIR__.'/test-0.1.rpm'));
+        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-c-0.1-2.noarch.rpm'));
+        $this->assertTrue($packager->movePackage(__DIR__.'/test-c-0.1.rpm'));
+        $this->assertTrue(file_exists(__DIR__.'/test-c-0.1.rpm'));
 
-        unlink(__DIR__.'/test-0.1.rpm');
-        unlink($_SERVER['HOME'].'/rpmbuild/SPECS/test.spec');
-        unlink($_SERVER['HOME'].'/rpmbuild/SOURCES/test.tar');
+        unlink(__DIR__.'/test-c-0.1.rpm');
+        unlink($_SERVER['HOME'].'/rpmbuild/SPECS/test-c.spec');
+        unlink($_SERVER['HOME'].'/rpmbuild/SOURCES/test-c.tar');
     }
 
     public function testSimple() {
@@ -75,7 +75,7 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
         touch(__DIR__.'/package/test2/abc');
 
         $spec = new Spec();
-        $spec->setPackageName('test');
+        $spec->setPackageName('test-s');
         $packager = new Packager();
         $packager->setSpec($spec);
 
@@ -84,26 +84,26 @@ class PackagerTest extends PHPUnit_Framework_TestCase {
         $packager->run();
 
         $this->assertEquals('%autosetup -c package', $spec->prep);
-        $this->assertEquals('rm -rf %{buildroot}'."\n".'mkdir -p %{buildroot}'."\n".'mkdir -p %{buildroot}/usr/share/test/'."\n".'cp -rp usr/share/test/* %{buildroot}/usr/share/test/', $spec->install);
+        $this->assertEquals('rm -rf %{buildroot}'."\n".'mkdir -p %{buildroot}'."\n".'cp -rp * %{buildroot}', $spec->install);
         $this->assertEquals('/usr/share/test/', $spec->files);
-        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SPECS/test.spec'));
-        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SOURCES/test.tar'));
+        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SPECS/test-s.spec'));
+        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/SOURCES/test-s.tar'));
 
-        $phar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/test.tar');
+        $phar = new PharData($_SERVER['HOME'].'/rpmbuild/SOURCES/test-s.tar');
         $this->assertTrue(isset($phar['usr/share/test/test/binary']));
         $this->assertTrue(isset($phar['usr/share/test/test2/abc']));
 
         $command = $packager->build();
-        $this->assertEquals('rpmbuild -bb '.$_SERVER['HOME'].'/rpmbuild/SPECS/test.spec', $command);
+        $this->assertEquals('rpmbuild -bb '.$_SERVER['HOME'].'/rpmbuild/SPECS/test-s.spec', $command);
         exec($command, $_, $result);
         $this->assertEquals(0, $result);
-        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-0.1-1.noarch.rpm'));
-        $this->assertTrue($packager->movePackage(__DIR__.'/test-0.1.rpm'));
-        $this->assertTrue(file_exists(__DIR__.'/test-0.1.rpm'));
+        $this->assertTrue(file_exists($_SERVER['HOME'].'/rpmbuild/RPMS/noarch/test-s-0.1-1.noarch.rpm'));
+        $this->assertTrue($packager->movePackage(__DIR__.'/test-s-0.1.rpm'));
+        $this->assertTrue(file_exists(__DIR__.'/test-s-0.1.rpm'));
 
-        unlink(__DIR__.'/test-0.1.rpm');
-        unlink($_SERVER['HOME'].'/rpmbuild/SPECS/test.spec');
-        unlink($_SERVER['HOME'].'/rpmbuild/SOURCES/test.tar');
+        unlink(__DIR__.'/test-s-0.1.rpm');
+        unlink($_SERVER['HOME'].'/rpmbuild/SPECS/test-s.spec');
+        unlink($_SERVER['HOME'].'/rpmbuild/SOURCES/test-s.tar');
     }
 
     private function removeDir($dir) {
