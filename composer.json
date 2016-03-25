@@ -1,6 +1,7 @@
 {
     "name": "wapmorgan/php-rpm-packager",
     "description": "RPM packager for PHP applications.",
+    "license": "GPL-3.0",
     "keywords": ["rpm", "packager", "package building"],
     "autoload": {
         "psr-4": {
