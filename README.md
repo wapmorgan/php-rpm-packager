@@ -1,6 +1,6 @@
 RPM packager (PHP)
 ==================
-[![Build Status](https://travis-ci.org/wapmorgan/php-rpm-packager.svg)](https://travis-ci.org/wapmorgan/php-rpm-packager) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wapmorgan/php-rpm-packager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/php-rpm-packager/?branch=master)
+[![Composer package](http://xn--e1adiijbgl.xn--p1acf/badge/wapmorgan/php-rpm-packager)](https://packagist.org/packages/wapmorgan/php-rpm-packager) [![Build Status](https://travis-ci.org/wapmorgan/php-rpm-packager.svg)](https://travis-ci.org/wapmorgan/php-rpm-packager) [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wapmorgan/php-rpm-packager/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wapmorgan/php-rpm-packager/?branch=master)
 
 A simple rpm packager for PHP applications.
 
